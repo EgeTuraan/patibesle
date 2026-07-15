@@ -286,10 +286,98 @@
       display: none;
     }
 
-    @keyframes pulse {
-      0% { opacity: 0.6; }
-      50% { opacity: 1; }
-      100% { opacity: 0.6; }
+    /* Toggle Switch Styles */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider.round {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.06);
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .slider.round:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider.round {
+      background-color: var(--color-primary);
+    }
+
+    input:checked + .slider.round:before {
+      transform: translateX(20px);
+    }
+
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      background: rgba(255, 255, 255, 0.01);
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .schedule-item:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .schedule-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .schedule-info input[type="time"] {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: white;
+      padding: 6px 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .schedule-info input[type="number"] {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: white;
+      padding: 6px;
+      width: 50px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
     }
   </style>
 </head>
@@ -342,6 +430,56 @@
         <button onclick="sendCommand('step', 400)" class="btn-portion">🐾 2 Ölçek</button>
       </div>
     </div>
+
+    <!-- CARD: Besleme Programı (Scheduled Feeding) -->
+    <form onsubmit="updateSchedules(event)" class="card">
+      <div class="card-title">⏰ Otomatik Besleme Programı</div>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Günlük otomatik öğünleri planlayın. Bilgiler bulut üzerinden mama kabına aktarılır.</p>
+      
+      <!-- Öğün 1 -->
+      <div class="schedule-item">
+        <label class="switch">
+          <input type="checkbox" id="en0">
+          <span class="slider round"></span>
+        </label>
+        <div class="schedule-info">
+          <span class="control-label">1. Öğün:</span>
+          <input type="time" id="time0">
+          <input type="number" id="turns0" min="1" max="50">
+          <span class="control-label">Tur</span>
+        </div>
+      </div>
+
+      <!-- Öğün 2 -->
+      <div class="schedule-item">
+        <label class="switch">
+          <input type="checkbox" id="en1">
+          <span class="slider round"></span>
+        </label>
+        <div class="schedule-info">
+          <span class="control-label">2. Öğün:</span>
+          <input type="time" id="time1">
+          <input type="number" id="turns1" min="1" max="50">
+          <span class="control-label">Tur</span>
+        </div>
+      </div>
+
+      <!-- Öğün 3 -->
+      <div class="schedule-item">
+        <label class="switch">
+          <input type="checkbox" id="en2">
+          <span class="slider round"></span>
+        </label>
+        <div class="schedule-info">
+          <span class="control-label">3. Öğün:</span>
+          <input type="time" id="time2">
+          <input type="number" id="turns2" min="1" max="50">
+          <span class="control-label">Tur</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-cw" style="width: 100%; margin-top: 15px;">Programı Güncelle</button>
+    </form>
 
     <!-- CARD 3: Mama Kabı Kapağı -->
     <div class="card">
@@ -426,6 +564,7 @@
       
       // Fetch once and start interval
       fetchStatus();
+      fetchSchedules();
     }
 
     function fetchStatus() {
@@ -519,6 +658,79 @@
       })
       .catch(err => {
         alert("Komut gönderilemedi: " + err);
+      });
+    }
+
+    function fetchSchedules() {
+      if (!fbHost) return;
+      let url = `https://${fbHost}/smartbowl/schedules.json`;
+      if (fbAuth) url += `?auth=${fbAuth}`;
+      
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          if (!data) return;
+          
+          // Firebase might return array or object
+          let items = [];
+          if (Array.isArray(data)) {
+            items = data;
+          } else {
+            // Object map
+            for (let k in data) {
+              items[parseInt(k)] = data[k];
+            }
+          }
+          
+          for (let i = 0; i < 3; i++) {
+            if (items[i]) {
+              document.getElementById(`en${i}`).checked = items[i].enabled;
+              const hh = String(items[i].hour).padStart(2, '0');
+              const mm = String(items[i].minute).padStart(2, '0');
+              document.getElementById(`time${i}`).value = `${hh}:${mm}`;
+              document.getElementById(`turns${i}`).value = items[i].turns;
+            }
+          }
+        })
+        .catch(err => console.error("Schedules fetch error:", err));
+    }
+
+    function updateSchedules(event) {
+      if (event) event.preventDefault();
+      
+      if (!fbHost) {
+        alert("Lütfen önce veritabanınızı bağlayın!");
+        return;
+      }
+      
+      const schedules = [];
+      for (let i = 0; i < 3; i++) {
+        const enabled = document.getElementById(`en${i}`).checked;
+        const timeVal = document.getElementById(`time${i}`).value || '00:00';
+        const [hour, minute] = timeVal.split(':').map(Number);
+        const turns = Number(document.getElementById(`turns${i}`).value) || 1;
+        
+        schedules.push({
+          enabled: enabled,
+          hour: hour,
+          minute: minute,
+          turns: turns
+        });
+      }
+      
+      let url = `https://${fbHost}/smartbowl/schedules.json`;
+      if (fbAuth) url += `?auth=${fbAuth}`;
+      
+      fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(schedules)
+      })
+      .then(() => {
+        alert("Besleme programı bulutta güncellendi!");
+      })
+      .catch(err => {
+        alert("Hata: " + err);
       });
     }
 
