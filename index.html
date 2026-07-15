@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PatiBesle - Bulut Kontrol Paneli</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 50% 0%, #201a2c 0%, #0e0a15 100%);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.06);
+      --text-main: #f1ecf7;
+      --text-muted: #a69fb0;
+      --color-primary: #ff8a75; /* Soft peach/coral */
+      --color-primary-glow: rgba(255, 138, 117, 0.22);
+      --color-secondary: #ffb86c; /* Soft gold/amber */
+      --color-secondary-glow: rgba(255, 184, 108, 0.22);
+      --color-danger: #ff5555;
+      --color-danger-glow: rgba(255, 85, 85, 0.3);
+      --color-success: #50fa7b;
+      --color-success-glow: rgba(80, 250, 123, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 5px;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff8a75 0%, #ffb86c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+
+    .config-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .config-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn {
+      padding: 14px;
+      border: none;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-portion {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-portion:hover {
+      background: var(--color-primary-glow);
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      color: #ffffff;
+    }
+
+    .btn-cw {
+      background: linear-gradient(135deg, #ff8a75 0%, #ff6b52 100%);
+      box-shadow: 0 4px 14px var(--color-primary-glow);
+    }
+
+    .btn-cw:hover {
+      box-shadow: 0 6px 20px var(--color-primary-glow);
+    }
+
+    .btn-ccw {
+      background: linear-gradient(135deg, #ffb86c 0%, #ffa040 100%);
+      box-shadow: 0 4px 14px var(--color-secondary-glow);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Status Items */
+    .status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .status-item:last-child {
+      border: none;
+      padding-bottom: 0;
+    }
+
+    .status-label {
+      color: var(--text-muted);
+    }
+
+    .status-val {
+      font-weight: 600;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-running {
+      background: rgba(80, 250, 123, 0.12);
+      color: var(--color-success);
+      border: 1px solid rgba(80, 250, 123, 0.25);
+      animation: pulse 1.5s infinite;
+    }
+
+    .badge-idle {
+      background: rgba(166, 159, 176, 0.12);
+      color: var(--text-muted);
+      border: 1px solid rgba(166, 159, 176, 0.2);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      background: #191424;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      padding: 28px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .input-field {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      padding: 12px 16px;
+      font-size: 1rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .input-field:focus {
+      border-color: var(--color-primary);
+    }
+
+    .error-banner {
+      background: rgba(255, 85, 85, 0.15);
+      border: 1px solid rgba(255, 85, 85, 0.3);
+      color: #ff8888;
+      border-radius: 16px;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="status-container" style="opacity: 0.5; transition: opacity 0.5s;">
+    <header>
+      <h1>🐾 PatiBesle</h1>
+      <p>Bulut Kontrol Paneli (İnternetten Erişim)</p>
+      <button class="config-btn" onclick="document.getElementById('config-modal').style.display='flex'">⚙️ Ayarlar</button>
+    </header>
+
+    <div class="error-banner" id="connection-error">
+      ⚠️ Firebase bağlantı hatası! Lütfen bilgilerinizi kontrol edin.
+    </div>
+
+    <!-- CARD 1: Food Level Tracker -->
+    <div class="card" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+      <div class="card-title" style="width: 100%; text-align: left;">🐾 Mama Deposu Seviyesi</div>
+      
+      <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; margin: 15px 0;">
+        <svg width="140" height="140" viewBox="0 0 140 140" style="transform: rotate(-90deg); position: absolute;">
+          <circle cx="70" cy="70" r="60" fill="transparent" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+          <circle id="progress-circle" cx="70" cy="70" r="60" fill="transparent" stroke="var(--color-primary)" stroke-width="8"
+                  stroke-dasharray="376.99" stroke-dashoffset="376.99" stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease;"/>
+        </svg>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+          <svg id="paw-icon" viewBox="0 0 100 100" style="width: 32px; height: 32px; fill: var(--color-primary); opacity: 0.8; margin-bottom: 2px;">
+            <path d="M50,45 C58,45 64,52 64,61 C64,71 58,78 50,78 C42,78 36,71 36,61 C36,52 42,45 50,45 Z"/>
+            <circle cx="28" cy="40" r="8" />
+            <circle cx="41" cy="27" r="9" />
+            <circle cx="59" cy="27" r="9" />
+            <circle cx="72" cy="40" r="8" />
+          </svg>
+          <span id="pct-val" style="font-size: 2rem; font-weight: 700; color: #ffffff; line-height: 1;">0%</span>
+          <span id="cm-val" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">- cm</span>
+        </div>
+      </div>
+      <div id="status-text" style="font-size: 1.05rem; font-weight: 600; color: var(--color-primary); margin-bottom: 5px;">Bağlantı bekleniyor...</div>
+    </div>
+
+    <!-- CARD 2: Şimdi Besle (Feed Now) -->
+    <div class="card">
+      <div class="card-title">🍲 Şimdi Besle</div>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Uzaktan ara öğün göndermek için bir porsiyon seçin.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <button onclick="sendCommand('step', 50)" class="btn-portion">🐾 1/4 Ölçek</button>
+        <button onclick="sendCommand('step', 100)" class="btn-portion">🐾 1/2 Ölçek</button>
+        <button onclick="sendCommand('step', 200)" class="btn-portion">🐾 1 Ölçek</button>
+        <button onclick="sendCommand('step', 400)" class="btn-portion">🐾 2 Ölçek</button>
+      </div>
+    </div>
+
+    <!-- CARD 3: Mama Kabı Kapağı -->
+    <div class="card">
+      <div class="card-title">🔒 Mama Kabı Kapağı</div>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Mama haznesinin kapağını manuel olarak açın veya kapatın.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <button id="btn-open" onclick="sendCommand('servo', 180)" class="btn btn-outline">🔓 Kapağı Aç</button>
+        <button id="btn-close" onclick="sendCommand('servo', 0)" class="btn btn-outline">🔒 Kapağı Kapat</button>
+      </div>
+    </div>
+
+    <!-- CARD 4: Bulut Durum Paneli -->
+    <div class="card">
+      <div class="card-title">📊 Sistem Durumu</div>
+      <div class="status-list">
+        <div class="status-item">
+          <span class="status-label">Son Güncelleme</span>
+          <span id="sync-time" class="status-val">-</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Motor Durumu</span>
+          <span id="motor-badge" class="badge badge-idle">Beklemede</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Kapak Açısı</span>
+          <span id="lid-angle-text" class="status-val">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AYARLAR MODAL -->
+  <div class="modal" id="config-modal">
+    <div class="modal-content">
+      <h3 style="color: white; font-weight: 700;">🌐 Bulut Ayarları</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Firebase Realtime Database bilgilerinizi girin. Bu veriler sadece tarayıcınızda saklanır.</p>
+      
+      <div>
+        <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Firebase Database Host</label>
+        <input type="text" id="cfg_host" class="input-field" placeholder="örn: proje-id.firebaseio.com">
+      </div>
+      
+      <div>
+        <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Database Secret (Auth Token)</label>
+        <input type="password" id="cfg_auth" class="input-field" placeholder="Gerekli değilse boş bırakın">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button onclick="saveConfig()" class="btn btn-cw" style="flex: 2; padding: 10px; border-radius: 12px;">Kaydet</button>
+        <button onclick="document.getElementById('config-modal').style.display='none'" class="btn btn-outline" style="flex: 1; padding: 10px; border-radius: 12px;">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let fbHost = localStorage.getItem('fb_host') || 'feeder-1c268-default-rtdb.europe-west1.firebasedatabase.app';
+    let fbAuth = localStorage.getItem('fb_auth') || '';
+
+    // Set initial input values
+    document.getElementById('cfg_host').value = fbHost;
+    document.getElementById('cfg_auth').value = fbAuth;
+
+    function saveConfig() {
+      fbHost = document.getElementById('cfg_host').value.trim();
+      fbAuth = document.getElementById('cfg_auth').value.trim();
+      
+      fbHost = fbHost.replace("https://", "");
+      if (fbHost.endsWith("/")) fbHost = fbHost.substring(0, fbHost.length - 1);
+      
+      localStorage.setItem('fb_host', fbHost);
+      localStorage.setItem('fb_auth', fbAuth);
+      
+      document.getElementById('config-modal').style.display = 'none';
+      initSync();
+    }
+
+    function initSync() {
+      if (!fbHost) {
+        document.getElementById('config-modal').style.display = 'flex';
+        return;
+      }
+      
+      // Fetch once and start interval
+      fetchStatus();
+    }
+
+    function fetchStatus() {
+      if (!fbHost) return;
+      let url = `https://${fbHost}/smartbowl/status.json`;
+      if (fbAuth) url += `?auth=${fbAuth}`;
+      
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          if (!data) return;
+          document.getElementById('status-container').style.opacity = '1';
+          document.getElementById('connection-error').style.display = 'none';
+          
+          const pct = data.food_level_pct || 0;
+          const cm = data.food_level_cm || 0;
+          const angle = data.lid_angle || 0;
+          const running = data.motor_running || false;
+          const syncTime = data.last_sync || '-';
+          
+          // Update UI
+          document.getElementById('pct-val').innerText = pct + '%';
+          document.getElementById('cm-val').innerText = (cm >= 0 ? cm.toFixed(1) : 'Hata') + ' cm';
+          document.getElementById('sync-time').innerText = syncTime;
+          
+          const offset = 376.99 * (1 - (pct / 100));
+          document.getElementById('progress-circle').style.strokeDashoffset = offset;
+          
+          let color = 'var(--color-danger)';
+          let statusText = 'Mama Az Kaldı! Lütfen Doldurun.';
+          if (pct > 50) {
+            color = 'var(--color-success)';
+            statusText = 'Mama Seviyesi İyi';
+          } else if (pct > 20) {
+            color = 'var(--color-secondary)';
+            statusText = 'Mama Orta Seviyede';
+          }
+          
+          document.getElementById('progress-circle').style.stroke = color;
+          document.getElementById('paw-icon').style.fill = color;
+          document.getElementById('status-text').style.color = color;
+          document.getElementById('status-text').innerText = statusText;
+          
+          if (angle >= 90) {
+            document.getElementById('btn-open').className = 'btn btn-cw';
+            document.getElementById('btn-close').className = 'btn btn-outline';
+          } else {
+            document.getElementById('btn-open').className = 'btn btn-outline';
+            document.getElementById('btn-close').className = 'btn btn-cw';
+          }
+          
+          const badge = document.getElementById('motor-badge');
+          if (running) {
+            badge.className = 'badge badge-running';
+            badge.innerText = 'Çalışıyor';
+          } else {
+            badge.className = 'badge badge-idle';
+            badge.innerText = 'Beklemede';
+          }
+          
+          document.getElementById('lid-angle-text').innerText = angle + '°';
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('connection-error').style.display = 'block';
+        });
+    }
+
+    function sendCommand(action, value) {
+      if (!fbHost) {
+        alert("Lütfen önce sağ üstteki Ayarlar butonundan Firebase veritabanınızı bağlayın!");
+        return;
+      }
+      let url = `https://${fbHost}/smartbowl/command.json`;
+      if (fbAuth) url += `?auth=${fbAuth}`;
+      
+      const payload = {
+        action: action,
+        value: value,
+        processed: false
+      };
+      
+      fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        // Instant visual feedback
+        console.log("Komut gonderildi:", action, value);
+      })
+      .catch(err => {
+        alert("Komut gönderilemedi: " + err);
+      });
+    }
+
+    // Auto sync
+    initSync();
+    setInterval(fetchStatus, 3000);
+  </script>
+</body>
+</html>
